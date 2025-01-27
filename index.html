@@ -22,11 +22,12 @@
             font-weight: 500;
         }
         select, input {
-            width: 100%;
+            width: 97%;
             padding: 0.5rem;
             border: 1px solid #ddd;
             border-radius: 4px;
             margin-bottom: 1rem;
+            font-size: 1rem;
         }
         button {
             width: 100%;
@@ -47,6 +48,45 @@
             border-radius: 4px;
             display: none;
         }
+        .dropdown {
+            position: relative;
+            width: 100%;
+            font-size: 1rem;
+            color: #000000; /* Placeholder text colour */
+        }
+        .dropdown-selected {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: white;
+            font-size: 1rem;
+            color: #757575; /* Placeholder text colour */
+        }
+        .dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            display: none;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .dropdown-options div {
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+        .dropdown-options div:hover {
+            background-color: #D08F56;
+            color: white;
+        }
+        .dropdown.show .dropdown-options {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -54,11 +94,13 @@
         <form id="tdeeForm">
             <div class="form-group">
                 <label for="gender">Gender</label>
-                <select id="gender" required>
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                </select>
+                <div class="dropdown" id="genderDropdown">
+                    <div class="dropdown-selected">Select Gender</div>
+                    <div class="dropdown-options">
+                        <div data-value="male">Male</div>
+                        <div data-value="female">Female</div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -78,14 +120,16 @@
 
             <div class="form-group">
                 <label for="activity">Exercise Level</label>
-                <select id="activity" required>
-                    <option value="">Select Exercise Level</option>
-                    <option value="1.2">Low Excercise (Mostly Seated)</option>
-                    <option value="1.375">Light Exercise (1-2 days/week)</option>
-                    <option value="1.55">Medium Exercise (3-5 days/week)</option>
-                    <option value="1.725">High Exercise (6-7 days/week)</option>
-                    <option value="1.9">Heavy Exercise (2x daily)</option>
-                </select>
+                <div class="dropdown" id="activityDropdown">
+                    <div class="dropdown-selected">Select Exercise Level</div>
+                    <div class="dropdown-options">
+                        <div data-value="1.2">Low Exercise (Mostly Seated)</div>
+                        <div data-value="1.375">Light Exercise (1-2 days/week)</div>
+                        <div data-value="1.55">Medium Exercise (3-5 days/week)</div>
+                        <div data-value="1.725">High Exercise (6-7 days/week)</div>
+                        <div data-value="1.9">Heavy Exercise (2x daily)</div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -100,14 +144,47 @@
     </div>
 
     <script>
+        function setupDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const selected = dropdown.querySelector('.dropdown-selected');
+            const options = dropdown.querySelector('.dropdown-options');
+
+            // Toggle dropdown visibility
+            selected.addEventListener('click', () => {
+                dropdown.classList.toggle('show');
+            });
+
+            // Handle option selection
+            options.addEventListener('click', (e) => {
+                if (e.target.dataset.value) {
+                    selected.textContent = e.target.textContent;
+                    selected.setAttribute('data-value', e.target.dataset.value);
+                    selected.style.color = '#000000'; // Change colour once selected
+                    dropdown.classList.remove('show');
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+
+            return selected;
+        }
+
+        const genderSelected = setupDropdown('genderDropdown');
+        const activitySelected = setupDropdown('activityDropdown');
+
         document.getElementById('tdeeForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const gender = document.getElementById('gender').value;
+
+            const gender = genderSelected.getAttribute('data-value');
             const age = parseFloat(document.getElementById('age').value);
             const weight = parseFloat(document.getElementById('weight').value);
             const height = parseFloat(document.getElementById('height').value);
-            const activity = parseFloat(document.getElementById('activity').value);
+            const activity = parseFloat(activitySelected.getAttribute('data-value'));
             const bodyFat = document.getElementById('bodyFat').value;
 
             let bmr;
@@ -123,7 +200,7 @@
             }
 
             const tdee = bmr * activity;
-            
+
             const resultDiv = document.getElementById('result');
             resultDiv.style.display = 'block';
             resultDiv.innerHTML = `
