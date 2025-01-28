@@ -7,6 +7,7 @@
             max-width: 600px;
             margin: 1rem auto;
             padding: 0 1rem;
+            scroll-behavior: smooth;
         }
         .card {
             border: 1px solid #ddd;
@@ -22,15 +23,15 @@
             font-weight: 500;
         }
         select, input {
-            width: 97%;
+            width: 96.7%;
             padding: 0.5rem;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.45rem;
             font-size: 1rem;
         }
         button {
-            width: 100%;
+            width: 100.1%;
             padding: 0.75rem;
             background: #D08F56;
             color: white;
@@ -48,11 +49,42 @@
             border-radius: 4px;
             display: none;
         }
+        .unit-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .unit-toggle button {
+            flex: 1;
+            background: #f3f4f6;
+            color: #666;
+            padding: 0.5rem;
+        }
+        .unit-toggle button.active {
+            background: #D08F56;
+            color: white;
+        }
+        .input-with-unit {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .input-with-unit input {
+            flex: 1;
+        }
+        .input-with-unit span {
+            min-width: 3rem;
+            color: #666;
+        }
+        .height-imperial {
+            display: flex;
+            gap: 0.5rem;
+        }
         .dropdown {
             position: relative;
             width: 100%;
             font-size: 1rem;
-            color: #000000; /* Placeholder text colour */
+            color: #000000;
         }
         .dropdown-selected {
             padding: 0.5rem;
@@ -61,7 +93,7 @@
             cursor: pointer;
             background-color: white;
             font-size: 1rem;
-            color: #757575; /* Placeholder text colour */
+            color: #757575;
         }
         .dropdown-options {
             position: absolute;
@@ -87,11 +119,19 @@
         .dropdown.show .dropdown-options {
             display: block;
         }
+        .height-imperial .dropdown {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <div class="card">
         <form id="tdeeForm">
+            <div class="unit-toggle">
+                <button type="button" id="metricBtn" class="active">Metric</button>
+                <button type="button" id="imperialBtn">Imperial</button>
+            </div>
+
             <div class="form-group">
                 <label for="gender">Gender</label>
                 <div class="dropdown" id="genderDropdown">
@@ -109,13 +149,47 @@
             </div>
 
             <div class="form-group">
-                <label for="weight">Weight (kg)</label>
-                <input type="number" id="weight" required placeholder="Enter weight in kilograms">
+                <label for="weight">Weight</label>
+                <div class="input-with-unit">
+                    <input type="number" id="weight" required placeholder="Enter weight">
+                    <span id="weightUnit">kg</span>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="height">Height (cm)</label>
-                <input type="number" id="height" required placeholder="Enter height in centimeters">
+                <label for="height">Height</label>
+                <div id="metricHeight" class="input-with-unit">
+                    <input type="number" id="heightCm" placeholder="Enter height">
+                    <span>cm</span>
+                </div>
+                <div id="imperialHeight" class="height-imperial" style="display: none;">
+                    <div class="dropdown" id="heightFtDropdown">
+                        <div class="dropdown-selected">Select Feet</div>
+                        <div class="dropdown-options">
+                            <div data-value="4">4 ft</div>
+                            <div data-value="5">5 ft</div>
+                            <div data-value="6">6 ft</div>
+                            <div data-value="7">7 ft</div>
+                        </div>
+                    </div>
+                    <div class="dropdown" id="heightInDropdown">
+                        <div class="dropdown-selected">Select Inches</div>
+                        <div class="dropdown-options">
+                            <div data-value="0">0 in</div>
+                            <div data-value="1">1 in</div>
+                            <div data-value="2">2 in</div>
+                            <div data-value="3">3 in</div>
+                            <div data-value="4">4 in</div>
+                            <div data-value="5">5 in</div>
+                            <div data-value="6">6 in</div>
+                            <div data-value="7">7 in</div>
+                            <div data-value="8">8 in</div>
+                            <div data-value="9">9 in</div>
+                            <div data-value="10">10 in</div>
+                            <div data-value="11">11 in</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -137,34 +211,33 @@
                 <input type="number" id="bodyFat" placeholder="Enter body fat percentage">
             </div>
 
-            <button type="submit">Calculate TDEE</button>
+            <button type="submit" id="calculateButton">Calculate TDEE</button>
         </form>
 
         <div id="result"></div>
     </div>
 
     <script>
+        let isMetric = true;
+
         function setupDropdown(id) {
             const dropdown = document.getElementById(id);
             const selected = dropdown.querySelector('.dropdown-selected');
             const options = dropdown.querySelector('.dropdown-options');
 
-            // Toggle dropdown visibility
             selected.addEventListener('click', () => {
                 dropdown.classList.toggle('show');
             });
 
-            // Handle option selection
             options.addEventListener('click', (e) => {
                 if (e.target.dataset.value) {
                     selected.textContent = e.target.textContent;
                     selected.setAttribute('data-value', e.target.dataset.value);
-                    selected.style.color = '#000000'; // Change colour once selected
+                    selected.style.color = '#000000';
                     dropdown.classList.remove('show');
                 }
             });
 
-            // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
                 if (!dropdown.contains(e.target)) {
                     dropdown.classList.remove('show');
@@ -176,14 +249,74 @@
 
         const genderSelected = setupDropdown('genderDropdown');
         const activitySelected = setupDropdown('activityDropdown');
+        const heightFtSelected = setupDropdown('heightFtDropdown');
+        const heightInSelected = setupDropdown('heightInDropdown');
+
+        function setUnit(unit) {
+            isMetric = unit === 'metric';
+            document.getElementById('metricBtn').classList.toggle('active', isMetric);
+            document.getElementById('imperialBtn').classList.toggle('active', !isMetric);
+            document.getElementById('weightUnit').textContent = isMetric ? 'kg' : 'lbs';
+            document.getElementById('metricHeight').style.display = isMetric ? 'flex' : 'none';
+            document.getElementById('imperialHeight').style.display = isMetric ? 'none' : 'flex';
+            
+            // Clear height inputs when switching units
+            document.getElementById('heightCm').value = '';
+            heightFtSelected.textContent = 'Select Feet';
+            heightInSelected.textContent = 'Select Inches';
+            heightFtSelected.removeAttribute('data-value');
+            heightInSelected.removeAttribute('data-value');
+        }
+
+        // Unit toggle buttons
+        document.getElementById('metricBtn').addEventListener('click', () => setUnit('metric'));
+        document.getElementById('imperialBtn').addEventListener('click', () => setUnit('imperial'));
+
+        function validateForm() {
+            const gender = genderSelected.getAttribute('data-value');
+            const age = document.getElementById('age').value;
+            const weight = document.getElementById('weight').value;
+            const activity = activitySelected.getAttribute('data-value');
+
+            if (!gender || !age || !weight || !activity) {
+                return false;
+            }
+
+            if (isMetric) {
+                return document.getElementById('heightCm').value !== '';
+            } else {
+                return heightFtSelected.getAttribute('data-value') && 
+                       heightInSelected.getAttribute('data-value');
+            }
+        }
+
+        function getHeight() {
+            if (isMetric) {
+                return parseFloat(document.getElementById('heightCm').value);
+            } else {
+                const feet = parseFloat(heightFtSelected.getAttribute('data-value') || 0);
+                const inches = parseFloat(heightInSelected.getAttribute('data-value') || 0);
+                return (feet * 30.48) + (inches * 2.54); // Convert to cm
+            }
+        }
+
+        function getWeight() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            return isMetric ? weight : weight * 0.453592; // Convert lbs to kg if imperial
+        }
 
         document.getElementById('tdeeForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
+            if (!validateForm()) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
             const gender = genderSelected.getAttribute('data-value');
             const age = parseFloat(document.getElementById('age').value);
-            const weight = parseFloat(document.getElementById('weight').value);
-            const height = parseFloat(document.getElementById('height').value);
+            const weight = getWeight();
+            const height = getHeight();
             const activity = parseFloat(activitySelected.getAttribute('data-value'));
             const bodyFat = document.getElementById('bodyFat').value;
 
@@ -208,6 +341,10 @@
                 <p>BMR: ${Math.round(bmr)} calories/day</p>
                 <p>TDEE: ${Math.round(tdee)} calories/day</p>
             `;
+
+            // Scroll to the calculate button
+            const calculateButton = document.getElementById('calculateButton');
+            calculateButton.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     </script>
 </body>
