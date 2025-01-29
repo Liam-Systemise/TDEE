@@ -390,11 +390,8 @@
 			resultDiv.innerHTML = `
 				<div class="results-section">
 					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Daily Energy Requirements</h2>
-					<p>BMR: ${Math.round(bmr)} calories/day</p>
-					<p>Your selected activity level (${activitySelected.textContent}):
-						<strong>${Math.round(tdee)} calories/day</strong>
-					</p>
-					<p style="margin-top: 10px; font-size: 0.9em;">Calories for other activity levels:</p>
+					<p>Basal Metabolic Rate: ${Math.round(bmr)} calories/day</p>
+					<p style="margin-top: 10px; font-size: 0.9em;">TDEE estimate for your activity level:</p>
 					<div style="margin-left: 15px;">
 						<p ${activity === 1.2 ? 'style="font-weight: bold;"' : ''}>Low Exercise (Mostly Seated): ${Math.round(bmr * 1.2)} calories/day</p>
 						<p ${activity === 1.375 ? 'style="font-weight: bold;"' : ''}>Light Exercise (1-2 days/week): ${Math.round(bmr * 1.375)} calories/day</p>
