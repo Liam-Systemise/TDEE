@@ -10,7 +10,7 @@
             scroll-behavior: smooth;
         }
         .card {
-            border: 1px solid #ddd;
+            border: 0px solid #ddd;
             border-radius: 0px;
             padding: 1.5rem;
         }
@@ -106,7 +106,7 @@
             display: none;
             z-index: 1000;
             max-height: 200px;
-            overflow-y: auto;
+            overflow-y: hidden;
         }
         .dropdown-options div {
             padding: 0.5rem;
@@ -306,46 +306,160 @@
         }
 
         document.getElementById('tdeeForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+			e.preventDefault();
 
-            if (!validateForm()) {
-                alert('Please fill in all required fields');
-                return;
-            }
+			if (!validateForm()) {
+				alert('Please fill in all required fields');
+				return;
+			}
 
-            const gender = genderSelected.getAttribute('data-value');
-            const age = parseFloat(document.getElementById('age').value);
-            const weight = getWeight();
-            const height = getHeight();
-            const activity = parseFloat(activitySelected.getAttribute('data-value'));
-            const bodyFat = document.getElementById('bodyFat').value;
+			const gender = genderSelected.getAttribute('data-value');
+			const age = parseFloat(document.getElementById('age').value);
+			const weight = getWeight();
+			const height = getHeight();
+			const activity = parseFloat(activitySelected.getAttribute('data-value'));
+			const bodyFat = document.getElementById('bodyFat').value;
 
-            let bmr;
-            if (bodyFat) {
-                // Katch-McArdle Formula
-                const leanMass = weight * (1 - bodyFat / 100);
-                bmr = 370 + (21.6 * leanMass);
-            } else {
-                // Mifflin-St Jeor Formula
-                bmr = gender === 'male' 
-                    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
-                    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
-            }
+			let bmr;
+			if (bodyFat) {
+				// Katch-McArdle Formula
+				const leanMass = weight * (1 - bodyFat / 100);
+				bmr = 370 + (21.6 * leanMass);
+			} else {
+				// Mifflin-St Jeor Formula
+				bmr = gender === 'male' 
+					? (10 * weight) + (6.25 * height) - (5 * age) + 5
+					: (10 * weight) + (6.25 * height) - (5 * age) - 161;
+			}
 
-            const tdee = bmr * activity;
+			const tdee = bmr * activity;
 
-            const resultDiv = document.getElementById('result');
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `
-                <p><strong>Results:</strong></p>
-                <p>BMR: ${Math.round(bmr)} calories/day</p>
-                <p>TDEE: ${Math.round(tdee)} calories/day</p>
-            `;
+			 // Calculate ideal weights
+			const heightInInches = height / 2.54;
+			
+			// Hamwi Formula (1964)
+			const hamwi = gender === 'male' 
+				? 106 + 6 * (heightInInches - 60)
+				: 100 + 5 * (heightInInches - 60);
+			
+			// Devine Formula (1974)
+			const devine = gender === 'male'
+				? 110 + 5.1 * (heightInInches - 60)
+				: 100 + 5 * (heightInInches - 60);
+			
+			// Robinson Formula (1983)
+			const robinson = gender === 'male'
+				? 114 + 4.2 * (heightInInches - 60)
+				: 108 + 3.7 * (heightInInches - 60);
+			
+			// Miller Formula (1983)
+			const miller = gender === 'male'
+				? 123.6 + 3.1 * (heightInInches - 60)
+				: 117 + 3.1 * (heightInInches - 60);
 
-            // Scroll to the calculate button
-            const calculateButton = document.getElementById('calculateButton');
-            calculateButton.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
+			// Convert to kg
+			const idealWeights = {
+				hamwi: (hamwi * 0.453592).toFixed(1),
+				devine: (devine * 0.453592).toFixed(1),
+				robinson: (robinson * 0.453592).toFixed(1),
+				miller: (miller * 0.453592).toFixed(1)
+			};
+
+			// Calculate min and max weights
+			const weights = Object.values(idealWeights).map(w => parseFloat(w));
+			const minWeight = Math.min(...weights).toFixed(1);
+			const maxWeight = Math.max(...weights).toFixed(1);
+
+			// Calculate BMI
+			const heightM = height / 100;
+			const bmi = (weight / (heightM * heightM)).toFixed(1);
+
+			// Calculate Maximum Muscular Potential
+			const mmp = (heightM * heightM * 25).toFixed(1);
+
+			// Get BMI category
+			let bmiCategory;
+			if (bmi < 18.5) bmiCategory = 'Underweight';
+			else if (bmi < 25) bmiCategory = 'Normal Weight';
+			else if (bmi < 30) bmiCategory = 'Overweight';
+			else bmiCategory = 'Obese';
+
+			// Update the results div
+			const resultDiv = document.getElementById('result');
+			resultDiv.style.display = 'block';
+			resultDiv.innerHTML = `
+				<div class="results-section">
+					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Daily Energy Requirements</h2>
+					<p>BMR: ${Math.round(bmr)} calories/day</p>
+					<p>Your selected activity level (${activitySelected.textContent}):
+						<strong>${Math.round(tdee)} calories/day</strong>
+					</p>
+					<p style="margin-top: 10px; font-size: 0.9em;">Calories for other activity levels:</p>
+					<div style="margin-left: 15px;">
+						<p ${activity === 1.2 ? 'style="font-weight: bold;"' : ''}>Low Exercise (Mostly Seated): ${Math.round(bmr * 1.2)} calories/day</p>
+						<p ${activity === 1.375 ? 'style="font-weight: bold;"' : ''}>Light Exercise (1-2 days/week): ${Math.round(bmr * 1.375)} calories/day</p>
+						<p ${activity === 1.55 ? 'style="font-weight: bold;"' : ''}>Medium Exercise (3-5 days/week): ${Math.round(bmr * 1.55)} calories/day</p>
+						<p ${activity === 1.725 ? 'style="font-weight: bold;"' : ''}>High Exercise (6-7 days/week): ${Math.round(bmr * 1.725)} calories/day</p>
+						<p ${activity === 1.9 ? 'style="font-weight: bold;"' : ''}>Heavy Exercise (2x daily): ${Math.round(bmr * 1.9)} calories/day</p>
+					</div>
+				</div>
+
+				<div class="results-section" style="margin-top: 20px;">
+					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Ideal Weight (${minWeight} - ${maxWeight} kg)</h2>
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+						<div>
+							<p>G.J. Hamwi (1964): ${idealWeights.hamwi} kg</p>
+							<p>B.J. Devine (1974): ${idealWeights.devine} kg</p>
+						</div>
+						<div>
+							<p>J.D. Robinson (1983): ${idealWeights.robinson} kg</p>
+							<p>D.R. Miller (1983): ${idealWeights.miller} kg</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="results-section" style="margin-top: 20px;">
+					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">BMI Score: ${bmi} (${bmiCategory})</h2>
+					<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+						<tr style="background-color: #f3f4f6;">
+							<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Classification</th>
+							<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">BMI Range</th>
+						</tr>
+						<tr style="background-color: ${bmi < 18.5 ? '#e5e7eb' : ''}">
+							<td style="padding: 8px; border: 1px solid #ddd;">Underweight</td>
+							<td style="padding: 8px; border: 1px solid #ddd;">&lt; 18.5</td>
+						</tr>
+						<tr style="background-color: ${bmi >= 18.5 && bmi < 25 ? '#e5e7eb' : ''}">
+							<td style="padding: 8px; border: 1px solid #ddd;">Normal Weight</td>
+							<td style="padding: 8px; border: 1px solid #ddd;">18.5 - 24.9</td>
+						</tr>
+						<tr style="background-color: ${bmi >= 25 && bmi < 30 ? '#e5e7eb' : ''}">
+							<td style="padding: 8px; border: 1px solid #ddd;">Overweight</td>
+							<td style="padding: 8px; border: 1px solid #ddd;">25.0 - 29.9</td>
+						</tr>
+						<tr style="background-color: ${bmi >= 30 ? '#e5e7eb' : ''}">
+							<td style="padding: 8px; border: 1px solid #ddd;">Obese</td>
+							<td style="padding: 8px; border: 1px solid #ddd;">&ge; 30.0</td>
+						</tr>
+					</table>
+				</div>
+
+				<div class="results-section" style="margin-top: 20px;">
+					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Maximum Muscular Potential</h2>
+					<p>Based on Martin Berkhan's Formula, your estimated maximum muscular potential is:</p>
+					<div style="margin-left: 15px; margin-top: 5px;">
+						<p>At 5% body fat: ${(heightM * heightM * 25 * 0.95).toFixed(1)} kg</p>
+						<p>At 10% body fat: ${(heightM * heightM * 25).toFixed(1)} kg</p>
+						<p>At 15% body fat: ${(heightM * heightM * 25 * 1.05).toFixed(1)} kg</p>
+					</div>
+					<p style="font-size: 0.9em; color: #666; margin-top: 5px;">Note: This is a theoretical maximum for natural athletes with several years of proper training and nutrition.</p>
+				</div>
+			`;
+
+			// Scroll to the calculate button
+			const calculateButton = document.getElementById('calculateButton');
+			calculateButton.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		});
     </script>
 </body>
 </html>
