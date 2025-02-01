@@ -668,7 +668,7 @@
 				
 				// Update calories text
 				const caloriesText = document.getElementById('macroCalories');
-				caloriesText.textContent = `These macronutrient values reflect your ${isMaintenance ? 'maintenance' : 'cutting'} calories of ${roundedCalories} calories / day${!isMaintenance ? `, which is a 500 calorie / day deficit from your maintenance of ${Math.round(tdee)} calories / day` : ''}.`;
+				caloriesText.textContent = `These macronutrient values reflect your ${isMaintenance ? 'maintenance' : 'cutting'} calories of ${roundedCalories} calories / day${!isMaintenance ? `. This is what you need to eat to lose weight` : '. This is what you need to eat to maintain your current weight'}.`;
 
 				// Calculate and update all macro ratios
 				const moderateMacros = calculateMacros(roundedCalories, ratios.moderate);
