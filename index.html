@@ -304,403 +304,405 @@
     </div>
 
     <script>
-        let isMetric = true;
+		document.addEventListener("DOMContentLoaded", function() {
+			let isMetric = true;
 
-        function setupDropdown(id) {
-            const dropdown = document.getElementById(id);
-            const selected = dropdown.querySelector('.dropdown-selected');
-            const options = dropdown.querySelector('.dropdown-options');
+			function setupDropdown(id) {
+				const dropdown = document.getElementById(id);
+				const selected = dropdown.querySelector('.dropdown-selected');
+				const options = dropdown.querySelector('.dropdown-options');
 
-            selected.addEventListener('click', () => {
-                dropdown.classList.toggle('show');
-            });
+				selected.addEventListener('click', () => {
+					dropdown.classList.toggle('show');
+				});
 
-            options.addEventListener('click', (e) => {
-                if (e.target.dataset.value) {
-                    selected.textContent = e.target.textContent;
-                    selected.setAttribute('data-value', e.target.dataset.value);
-                    selected.style.color = '#000000';
-                    dropdown.classList.remove('show');
-                }
-            });
+				options.addEventListener('click', (e) => {
+					if (e.target.dataset.value) {
+						selected.textContent = e.target.textContent;
+						selected.setAttribute('data-value', e.target.dataset.value);
+						selected.style.color = '#000000';
+						dropdown.classList.remove('show');
+					}
+				});
 
-            document.addEventListener('click', (e) => {
-                if (!dropdown.contains(e.target)) {
-                    dropdown.classList.remove('show');
-                }
-            });
+				document.addEventListener('click', (e) => {
+					if (!dropdown.contains(e.target)) {
+						dropdown.classList.remove('show');
+					}
+				});
 
-            return selected;
-        }
-
-        const genderSelected = setupDropdown('genderDropdown');
-        const activitySelected = setupDropdown('activityDropdown');
-        const heightFtSelected = setupDropdown('heightFtDropdown');
-        const heightInSelected = setupDropdown('heightInDropdown');
-
-        function setUnit(unit) {
-            isMetric = unit === 'metric';
-            document.getElementById('metricBtn').classList.toggle('active', isMetric);
-            document.getElementById('imperialBtn').classList.toggle('active', !isMetric);
-            document.getElementById('weightUnit').textContent = isMetric ? 'kg' : 'lbs';
-            document.getElementById('metricHeight').style.display = isMetric ? 'flex' : 'none';
-            document.getElementById('imperialHeight').style.display = isMetric ? 'none' : 'flex';
-            
-            // Clear height inputs when switching units
-            document.getElementById('heightCm').value = '';
-            heightFtSelected.textContent = 'Select Feet';
-            heightInSelected.textContent = 'Select Inches';
-            heightFtSelected.removeAttribute('data-value');
-            heightInSelected.removeAttribute('data-value');
-        }
-
-        // Unit toggle buttons
-        document.getElementById('metricBtn').addEventListener('click', () => setUnit('metric'));
-        document.getElementById('imperialBtn').addEventListener('click', () => setUnit('imperial'));
-
-        function validateForm() {
-            const gender = genderSelected.getAttribute('data-value');
-            const age = document.getElementById('age').value;
-            const weight = document.getElementById('weight').value;
-            const activity = activitySelected.getAttribute('data-value');
-
-            if (!gender || !age || !weight || !activity) {
-                return false;
-            }
-
-            if (isMetric) {
-                return document.getElementById('heightCm').value !== '';
-            } else {
-                return heightFtSelected.getAttribute('data-value') && 
-                       heightInSelected.getAttribute('data-value');
-            }
-        }
-
-        function getHeight() {
-            if (isMetric) {
-                return parseFloat(document.getElementById('heightCm').value);
-            } else {
-                const feet = parseFloat(heightFtSelected.getAttribute('data-value') || 0);
-                const inches = parseFloat(heightInSelected.getAttribute('data-value') || 0);
-                return (feet * 30.48) + (inches * 2.54); // Convert to cm
-            }
-        }
-
-        function getWeight() {
-            const weight = parseFloat(document.getElementById('weight').value);
-            return isMetric ? weight : weight * 0.453592; // Convert lbs to kg if imperial
-        }
-
-        document.getElementById('tdeeForm').addEventListener('submit', function(e) {
-			e.preventDefault();
-
-			if (!validateForm()) {
-				alert('Please fill in all required fields');
-				return;
+				return selected;
 			}
 
-			const gender = genderSelected.getAttribute('data-value');
-			const age = parseFloat(document.getElementById('age').value);
-			const weight = getWeight();
-			const height = getHeight();
-			const activity = parseFloat(activitySelected.getAttribute('data-value'));
-			const bodyFat = document.getElementById('bodyFat').value;
+			const genderSelected = setupDropdown('genderDropdown');
+			const activitySelected = setupDropdown('activityDropdown');
+			const heightFtSelected = setupDropdown('heightFtDropdown');
+			const heightInSelected = setupDropdown('heightInDropdown');
 
-			let bmr;
-			if (bodyFat) {
-				// Katch-McArdle Formula
-				const leanMass = weight * (1 - bodyFat / 100);
-				bmr = 370 + (21.6 * leanMass);
-			} else {
-				// Mifflin-St Jeor Formula
-				bmr = gender === 'male' 
-					? (10 * weight) + (6.25 * height) - (5 * age) + 5
-					: (10 * weight) + (6.25 * height) - (5 * age) - 161;
+			function setUnit(unit) {
+				isMetric = unit === 'metric';
+				document.getElementById('metricBtn').classList.toggle('active', isMetric);
+				document.getElementById('imperialBtn').classList.toggle('active', !isMetric);
+				document.getElementById('weightUnit').textContent = isMetric ? 'kg' : 'lbs';
+				document.getElementById('metricHeight').style.display = isMetric ? 'flex' : 'none';
+				document.getElementById('imperialHeight').style.display = isMetric ? 'none' : 'flex';
+				
+				// Clear height inputs when switching units
+				document.getElementById('heightCm').value = '';
+				heightFtSelected.textContent = 'Select Feet';
+				heightInSelected.textContent = 'Select Inches';
+				heightFtSelected.removeAttribute('data-value');
+				heightInSelected.removeAttribute('data-value');
 			}
 
-			const tdee = bmr * activity;
-			currentTDEE = Math.round(tdee); // Store rounded TDEE
+			// Unit toggle buttons
+			document.getElementById('metricBtn').addEventListener('click', () => setUnit('metric'));
+			document.getElementById('imperialBtn').addEventListener('click', () => setUnit('imperial'));
 
-			 // Calculate ideal weights
-			const heightInInches = height / 2.54;
-			
-			// Hamwi Formula (1964)
-			const hamwi = gender === 'male' 
-				? 106 + 6 * (heightInInches - 60)
-				: 100 + 5 * (heightInInches - 60);
-			
-			// Devine Formula (1974)
-			const devine = gender === 'male'
-				? 110 + 5.1 * (heightInInches - 60)
-				: 100 + 5 * (heightInInches - 60);
-			
-			// Robinson Formula (1983)
-			const robinson = gender === 'male'
-				? 114 + 4.2 * (heightInInches - 60)
-				: 108 + 3.7 * (heightInInches - 60);
-			
-			// Miller Formula (1983)
-			const miller = gender === 'male'
-				? 123.6 + 3.1 * (heightInInches - 60)
-				: 117 + 3.1 * (heightInInches - 60);
+			function validateForm() {
+				const gender = genderSelected.getAttribute('data-value');
+				const age = document.getElementById('age').value;
+				const weight = document.getElementById('weight').value;
+				const activity = activitySelected.getAttribute('data-value');
 
-			// Convert to kg
-			const weightUnit = isMetric ? 'kg' : 'lbs';
+				if (!gender || !age || !weight || !activity) {
+					return false;
+				}
 
-			// Convert weight if needed
-			const idealWeights = {
-				hamwi: isMetric ? (hamwi * 0.453592).toFixed(1) : hamwi.toFixed(1),
-				devine: isMetric ? (devine * 0.453592).toFixed(1) : devine.toFixed(1),
-				robinson: isMetric ? (robinson * 0.453592).toFixed(1) : robinson.toFixed(1),
-				miller: isMetric ? (miller * 0.453592).toFixed(1) : miller.toFixed(1)
-			};
+				if (isMetric) {
+					return document.getElementById('heightCm').value !== '';
+				} else {
+					return heightFtSelected.getAttribute('data-value') && 
+						   heightInSelected.getAttribute('data-value');
+				}
+			}
 
-			// Calculate min and max weights
-			const weights = Object.values(idealWeights).map(w => parseFloat(w));
-			const minWeight = Math.min(...weights).toFixed(1);
-			const maxWeight = Math.max(...weights).toFixed(1);
+			function getHeight() {
+				if (isMetric) {
+					return parseFloat(document.getElementById('heightCm').value);
+				} else {
+					const feet = parseFloat(heightFtSelected.getAttribute('data-value') || 0);
+					const inches = parseFloat(heightInSelected.getAttribute('data-value') || 0);
+					return (feet * 30.48) + (inches * 2.54); // Convert to cm
+				}
+			}
 
-			// Calculate BMI
-			const heightM = height / 100;
-			const bmi = (weight / (heightM * heightM)).toFixed(1);
+			function getWeight() {
+				const weight = parseFloat(document.getElementById('weight').value);
+				return isMetric ? weight : weight * 0.453592; // Convert lbs to kg if imperial
+			}
 
-			// Calculate Maximum Muscular Potential
-			const mmpMin = Math.round(height - 102);
-			const mmpMax = Math.round(height - 98);
-			const mmpAvg = Math.round(height - 100);
+			document.getElementById('tdeeForm').addEventListener('submit', function(e) {
+				e.preventDefault();
 
-			// Get BMI category
-			let bmiCategory;
-			if (bmi < 18.5) bmiCategory = 'Underweight';
-			else if (bmi < 25) bmiCategory = 'Normal Weight';
-			else if (bmi < 30) bmiCategory = 'Overweight';
-			else bmiCategory = 'Obese';
-
-			// Update the results div
-			const resultDiv = document.getElementById('result');
-			resultDiv.style.display = 'block';
-			resultDiv.innerHTML = `
-				<div class="results-section">
-					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Daily Energy Requirements</h2>
-					<p>Basal Metabolic Rate: ${Math.round(bmr)} calories/day</p>
-					<p style="margin-top: 10px; font-size: 0.9em;">TDEE estimate for your activity level:</p>
-					<div style="margin-left: 15px;">
-						<p ${activity === 1.2 ? 'style="font-weight: bold;"' : ''}>Low Exercise (Mostly Seated): ${Math.round(bmr * 1.2)} calories/day</p>
-						<p ${activity === 1.375 ? 'style="font-weight: bold;"' : ''}>Light Exercise (1-2 days/week): ${Math.round(bmr * 1.375)} calories/day</p>
-						<p ${activity === 1.55 ? 'style="font-weight: bold;"' : ''}>Medium Exercise (3-5 days/week): ${Math.round(bmr * 1.55)} calories/day</p>
-						<p ${activity === 1.725 ? 'style="font-weight: bold;"' : ''}>High Exercise (6-7 days/week): ${Math.round(bmr * 1.725)} calories/day</p>
-						<p ${activity === 1.9 ? 'style="font-weight: bold;"' : ''}>Heavy Exercise (2x daily): ${Math.round(bmr * 1.9)} calories/day</p>
-					</div>
-				</div>
-
-				<div class="results-section" style="margin-top: 20px;">
-					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Ideal Weight (${minWeight} - ${maxWeight} ${weightUnit})</h2>
-					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-						<div>
-							<p>G.J. Hamwi (1964): ${idealWeights.hamwi} ${weightUnit}</p>
-							<p>B.J. Devine (1974): ${idealWeights.devine} ${weightUnit}</p>
-						</div>
-						<div>
-							<p>J.D. Robinson (1983): ${idealWeights.robinson} ${weightUnit}</p>
-							<p>D.R. Miller (1983): ${idealWeights.miller} ${weightUnit}</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="results-section" style="margin-top: 20px;">
-					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">BMI Score: ${bmi} (${bmiCategory})</h2>
-					<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-						<tr style="background-color: #e5e7eb;">
-							<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Classification</th>
-							<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">BMI Range</th>
-						</tr>
-						<tr style="background-color: ${bmi < 18.5 ? '#f3f4f6' : ''}">
-							<td style="padding: 8px; border: 1px solid #ddd;">Underweight</td>
-							<td style="padding: 8px; border: 1px solid #ddd;">&lt; 18.5</td>
-						</tr>
-						<tr style="background-color: ${bmi >= 18.5 && bmi < 25 ? '#f3f4f6' : ''}">
-							<td style="padding: 8px; border: 1px solid #ddd;">Normal Weight</td>
-							<td style="padding: 8px; border: 1px solid #ddd;">18.5 - 24.9</td>
-						</tr>
-						<tr style="background-color: ${bmi >= 25 && bmi < 30 ? '#f3f4f6' : ''}">
-							<td style="padding: 8px; border: 1px solid #ddd;">Overweight</td>
-							<td style="padding: 8px; border: 1px solid #ddd;">25.0 - 29.9</td>
-						</tr>
-						<tr style="background-color: ${bmi >= 30 ? '#f3f4f6' : ''}">
-							<td style="padding: 8px; border: 1px solid #ddd;">Obese</td>
-							<td style="padding: 8px; border: 1px solid #ddd;">&ge; 30.0</td>
-						</tr>
-					</table>
-				</div>
-
-				<div class="macro-section">
-					<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Macronutrients</h2>
-					
-					<div class="macro-toggle">
-						<button type="button" id="maintenanceBtn" class="active">Maintenance</button>
-						<button type="button" id="cuttingBtn">Cutting</button>
-					</div>
-					
-					<p id="macroCalories"></p>
-					
-					<p class="macro-guide">30/35/35 means 30% protein, 35% fats, 35% carbs</p>
-					
-					<div class="macro-ratio-section">
-						<div class="macro-ratio-title">Moderate Carb (30/35/35)</div>
-						<div class="macro-values">
-							<div class="macro-value-box">
-								<div id="moderateProtein" class="macro-number">0g</div>
-								<div class="macro-label">protein</div>
-							</div>
-							<div class="macro-value-box">
-								<div id="moderateFat" class="macro-number">0g</div>
-								<div class="macro-label">fats</div>
-							</div>
-							<div class="macro-value-box">
-								<div id="moderateCarb" class="macro-number">0g</div>
-								<div class="macro-label">carbs</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="macro-ratio-section">
-						<div class="macro-ratio-title">Lower Carb (40/40/20)</div>
-						<div class="macro-values">
-							<div class="macro-value-box">
-								<div id="lowerProtein" class="macro-number">0g</div>
-								<div class="macro-label">protein</div>
-							</div>
-							<div class="macro-value-box">
-								<div id="lowerFat" class="macro-number">0g</div>
-								<div class="macro-label">fats</div>
-							</div>
-							<div class="macro-value-box">
-								<div id="lowerCarb" class="macro-number">0g</div>
-								<div class="macro-label">carbs</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="macro-ratio-section">
-						<div class="macro-ratio-title">Higher Carb (30/20/50)</div>
-						<div class="macro-values">
-							<div class="macro-value-box">
-								<div id="higherProtein" class="macro-number">0g</div>
-								<div class="macro-label">protein</div>
-							</div>
-							<div class="macro-value-box">
-								<div id="higherFat" class="macro-number">0g</div>
-								<div class="macro-label">fats</div>
-							</div>
-							<div class="macro-value-box">
-								<div id="higherCarb" class="macro-number">0g</div>
-								<div class="macro-label">carbs</div>
-							</div>
-						</div>
-					</div>
-					<p class="macro-guide">There are 4 calories per gram of both protein and carbohydrates, and 9 calories per gram of fats.</p>
-					<p style="font-size: 1em; margin-top: 5px;">
-						Want more support, motivation & tips? Join our helpful free community on 
-						<a href="https://www.skool.com/calorie-deficit-with-sammi/about" target="_blank" rel="noopener noreferrer" style="color: black; text-decoration: none;">
-							Skool by <span style="text-decoration: underline;"><strong>clicking here!</span> 🔗
-						</a>
-					</p>
-				</div>
-			`;
-			
-			 setTimeout(() => {
-				const maintenanceBtn = document.getElementById('maintenanceBtn');
-				const cuttingBtn = document.getElementById('cuttingBtn');
-
-				if (!maintenanceBtn || !cuttingBtn) {
-					console.error("Maintenance or Cutting button not found!");
+				if (!validateForm()) {
+					alert('Please fill in all required fields');
 					return;
 				}
 
-				maintenanceBtn.addEventListener('click', function () {
-					isMaintenance = true;
-					maintenanceBtn.classList.add('active');
-					cuttingBtn.classList.remove('active');
-					updateMacros(currentTDEE);
-				});
+				const gender = genderSelected.getAttribute('data-value');
+				const age = parseFloat(document.getElementById('age').value);
+				const weight = getWeight();
+				const height = getHeight();
+				const activity = parseFloat(activitySelected.getAttribute('data-value'));
+				const bodyFat = document.getElementById('bodyFat').value;
 
-				cuttingBtn.addEventListener('click', function () {
-					isMaintenance = false;
-					cuttingBtn.classList.add('active');
-					maintenanceBtn.classList.remove('active');
-					updateMacros(currentTDEE);
-				});
+				let bmr;
+				if (bodyFat) {
+					// Katch-McArdle Formula
+					const leanMass = weight * (1 - bodyFat / 100);
+					bmr = 370 + (21.6 * leanMass);
+				} else {
+					// Mifflin-St Jeor Formula
+					bmr = gender === 'male' 
+						? (10 * weight) + (6.25 * height) - (5 * age) + 5
+						: (10 * weight) + (6.25 * height) - (5 * age) - 161;
+				}
 
-			}, 100); // Small delay to ensure buttons exist
+				const tdee = bmr * activity;
+				currentTDEE = Math.round(tdee); // Store rounded TDEE
 
-			// **Ensure macros update after elements exist**
+				 // Calculate ideal weights
+				const heightInInches = height / 2.54;
+				
+				// Hamwi Formula (1964)
+				const hamwi = gender === 'male' 
+					? 106 + 6 * (heightInInches - 60)
+					: 100 + 5 * (heightInInches - 60);
+				
+				// Devine Formula (1974)
+				const devine = gender === 'male'
+					? 110 + 5.1 * (heightInInches - 60)
+					: 100 + 5 * (heightInInches - 60);
+				
+				// Robinson Formula (1983)
+				const robinson = gender === 'male'
+					? 114 + 4.2 * (heightInInches - 60)
+					: 108 + 3.7 * (heightInInches - 60);
+				
+				// Miller Formula (1983)
+				const miller = gender === 'male'
+					? 123.6 + 3.1 * (heightInInches - 60)
+					: 117 + 3.1 * (heightInInches - 60);
+
+				// Convert to kg
+				const weightUnit = isMetric ? 'kg' : 'lbs';
+
+				// Convert weight if needed
+				const idealWeights = {
+					hamwi: isMetric ? (hamwi * 0.453592).toFixed(1) : hamwi.toFixed(1),
+					devine: isMetric ? (devine * 0.453592).toFixed(1) : devine.toFixed(1),
+					robinson: isMetric ? (robinson * 0.453592).toFixed(1) : robinson.toFixed(1),
+					miller: isMetric ? (miller * 0.453592).toFixed(1) : miller.toFixed(1)
+				};
+
+				// Calculate min and max weights
+				const weights = Object.values(idealWeights).map(w => parseFloat(w));
+				const minWeight = Math.min(...weights).toFixed(1);
+				const maxWeight = Math.max(...weights).toFixed(1);
+
+				// Calculate BMI
+				const heightM = height / 100;
+				const bmi = (weight / (heightM * heightM)).toFixed(1);
+
+				// Calculate Maximum Muscular Potential
+				const mmpMin = Math.round(height - 102);
+				const mmpMax = Math.round(height - 98);
+				const mmpAvg = Math.round(height - 100);
+
+				// Get BMI category
+				let bmiCategory;
+				if (bmi < 18.5) bmiCategory = 'Underweight';
+				else if (bmi < 25) bmiCategory = 'Normal Weight';
+				else if (bmi < 30) bmiCategory = 'Overweight';
+				else bmiCategory = 'Obese';
+
+				// Update the results div
+				const resultDiv = document.getElementById('result');
+				resultDiv.style.display = 'block';
+				resultDiv.innerHTML = `
+					<div class="results-section">
+						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Daily Energy Requirements</h2>
+						<p>Basal Metabolic Rate: ${Math.round(bmr)} calories/day</p>
+						<p style="margin-top: 10px; font-size: 0.9em;">TDEE estimate for your activity level:</p>
+						<div style="margin-left: 15px;">
+							<p ${activity === 1.2 ? 'style="font-weight: bold;"' : ''}>Low Exercise (Mostly Seated): ${Math.round(bmr * 1.2)} calories/day</p>
+							<p ${activity === 1.375 ? 'style="font-weight: bold;"' : ''}>Light Exercise (1-2 days/week): ${Math.round(bmr * 1.375)} calories/day</p>
+							<p ${activity === 1.55 ? 'style="font-weight: bold;"' : ''}>Medium Exercise (3-5 days/week): ${Math.round(bmr * 1.55)} calories/day</p>
+							<p ${activity === 1.725 ? 'style="font-weight: bold;"' : ''}>High Exercise (6-7 days/week): ${Math.round(bmr * 1.725)} calories/day</p>
+							<p ${activity === 1.9 ? 'style="font-weight: bold;"' : ''}>Heavy Exercise (2x daily): ${Math.round(bmr * 1.9)} calories/day</p>
+						</div>
+					</div>
+
+					<div class="results-section" style="margin-top: 20px;">
+						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Ideal Weight (${minWeight} - ${maxWeight} ${weightUnit})</h2>
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+							<div>
+								<p>G.J. Hamwi (1964): ${idealWeights.hamwi} ${weightUnit}</p>
+								<p>B.J. Devine (1974): ${idealWeights.devine} ${weightUnit}</p>
+							</div>
+							<div>
+								<p>J.D. Robinson (1983): ${idealWeights.robinson} ${weightUnit}</p>
+								<p>D.R. Miller (1983): ${idealWeights.miller} ${weightUnit}</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="results-section" style="margin-top: 20px;">
+						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">BMI Score: ${bmi} (${bmiCategory})</h2>
+						<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+							<tr style="background-color: #e5e7eb;">
+								<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Classification</th>
+								<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">BMI Range</th>
+							</tr>
+							<tr style="background-color: ${bmi < 18.5 ? '#f3f4f6' : ''}">
+								<td style="padding: 8px; border: 1px solid #ddd;">Underweight</td>
+								<td style="padding: 8px; border: 1px solid #ddd;">&lt; 18.5</td>
+							</tr>
+							<tr style="background-color: ${bmi >= 18.5 && bmi < 25 ? '#f3f4f6' : ''}">
+								<td style="padding: 8px; border: 1px solid #ddd;">Normal Weight</td>
+								<td style="padding: 8px; border: 1px solid #ddd;">18.5 - 24.9</td>
+							</tr>
+							<tr style="background-color: ${bmi >= 25 && bmi < 30 ? '#f3f4f6' : ''}">
+								<td style="padding: 8px; border: 1px solid #ddd;">Overweight</td>
+								<td style="padding: 8px; border: 1px solid #ddd;">25.0 - 29.9</td>
+							</tr>
+							<tr style="background-color: ${bmi >= 30 ? '#f3f4f6' : ''}">
+								<td style="padding: 8px; border: 1px solid #ddd;">Obese</td>
+								<td style="padding: 8px; border: 1px solid #ddd;">&ge; 30.0</td>
+							</tr>
+						</table>
+					</div>
+
+					<div class="macro-section">
+						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Macronutrients</h2>
+						
+						<div class="macro-toggle">
+							<button type="button" id="maintenanceBtn" class="active">Maintenance</button>
+							<button type="button" id="cuttingBtn">Cutting</button>
+						</div>
+						
+						<p id="macroCalories"></p>
+						
+						<p class="macro-guide">30/35/35 means 30% protein, 35% fats, 35% carbs</p>
+						
+						<div class="macro-ratio-section">
+							<div class="macro-ratio-title">Moderate Carb (30/35/35)</div>
+							<div class="macro-values">
+								<div class="macro-value-box">
+									<div id="moderateProtein" class="macro-number">0g</div>
+									<div class="macro-label">protein</div>
+								</div>
+								<div class="macro-value-box">
+									<div id="moderateFat" class="macro-number">0g</div>
+									<div class="macro-label">fats</div>
+								</div>
+								<div class="macro-value-box">
+									<div id="moderateCarb" class="macro-number">0g</div>
+									<div class="macro-label">carbs</div>
+								</div>
+							</div>
+						</div>
+						
+						<div class="macro-ratio-section">
+							<div class="macro-ratio-title">Lower Carb (40/40/20)</div>
+							<div class="macro-values">
+								<div class="macro-value-box">
+									<div id="lowerProtein" class="macro-number">0g</div>
+									<div class="macro-label">protein</div>
+								</div>
+								<div class="macro-value-box">
+									<div id="lowerFat" class="macro-number">0g</div>
+									<div class="macro-label">fats</div>
+								</div>
+								<div class="macro-value-box">
+									<div id="lowerCarb" class="macro-number">0g</div>
+									<div class="macro-label">carbs</div>
+								</div>
+							</div>
+						</div>
+						
+						<div class="macro-ratio-section">
+							<div class="macro-ratio-title">Higher Carb (30/20/50)</div>
+							<div class="macro-values">
+								<div class="macro-value-box">
+									<div id="higherProtein" class="macro-number">0g</div>
+									<div class="macro-label">protein</div>
+								</div>
+								<div class="macro-value-box">
+									<div id="higherFat" class="macro-number">0g</div>
+									<div class="macro-label">fats</div>
+								</div>
+								<div class="macro-value-box">
+									<div id="higherCarb" class="macro-number">0g</div>
+									<div class="macro-label">carbs</div>
+								</div>
+							</div>
+						</div>
+						<p class="macro-guide">There are 4 calories per gram of both protein and carbohydrates, and 9 calories per gram of fats.</p>
+						<p style="font-size: 1em; margin-top: 5px;">
+							Want more support, motivation & tips? Join our helpful free community on 
+							<a href="https://www.skool.com/calorie-deficit-with-sammi/about" target="_blank" rel="noopener noreferrer" style="color: black; text-decoration: none;">
+								Skool by <span style="text-decoration: underline;"><strong>clicking here!</span> 🔗
+							</a>
+						</p>
+					</div>
+				`;
+				
+				 setTimeout(() => {
+					const maintenanceBtn = document.getElementById('maintenanceBtn');
+					const cuttingBtn = document.getElementById('cuttingBtn');
+
+					if (!maintenanceBtn || !cuttingBtn) {
+						console.error("Maintenance or Cutting button not found!");
+						return;
+					}
+
+					maintenanceBtn.addEventListener('click', function () {
+						isMaintenance = true;
+						maintenanceBtn.classList.add('active');
+						cuttingBtn.classList.remove('active');
+						updateMacros(currentTDEE);
+					});
+
+					cuttingBtn.addEventListener('click', function () {
+						isMaintenance = false;
+						cuttingBtn.classList.add('active');
+						maintenanceBtn.classList.remove('active');
+						updateMacros(currentTDEE);
+					});
+
+				}, 100); // Small delay to ensure buttons exist
+
+				// **Ensure macros update after elements exist**
+				
+				updateMacros(tdee);
+
+				// Scroll to the calculate button
+				const calculateButton = document.getElementById('calculateButton');
+				calculateButton.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			});
+			let isMaintenance = true;
+			let currentTDEE = 0;
 			
-			updateMacros(tdee);
+			const ratios = {
+				moderate: { protein: 0.30, fats: 0.35, carbs: 0.35 },
+				lower: { protein: 0.40, fats: 0.40, carbs: 0.20 },
+				higher: { protein: 0.30, fats: 0.20, carbs: 0.50 }
+			};
+			
+			function calculateMacros(calories, ratio) {
+				return {
+					protein: Math.round((calories * ratio.protein) / 4), // 4 calories per gram
+					fats: Math.round((calories * ratio.fats) / 9),      // 9 calories per gram
+					carbs: Math.round((calories * ratio.carbs) / 4)     // 4 calories per gram
+				};
+			}
+			
+			function updateMacros(tdee) {
+				const calories = isMaintenance ? tdee : tdee - 500;
+				currentTDEE = tdee;
+				
+				// **Round calories to nearest whole number**
+				const roundedCalories = Math.round(calories);
+				
+				// Update calories text
+				const caloriesText = document.getElementById('macroCalories');
+				caloriesText.textContent = `These macronutrient values reflect your ${isMaintenance ? 'maintenance' : 'cutting'} calories of ${roundedCalories} calories / day${!isMaintenance ? `, which is a 500 calorie / day deficit from your maintenance of ${Math.round(tdee)} calories / day` : ''}.`;
 
-			// Scroll to the calculate button
-			const calculateButton = document.getElementById('calculateButton');
-			calculateButton.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				// Calculate and update all macro ratios
+				const moderateMacros = calculateMacros(roundedCalories, ratios.moderate);
+				document.getElementById('moderateProtein').textContent = moderateMacros.protein + 'g';
+				document.getElementById('moderateFat').textContent = moderateMacros.fats + 'g';
+				document.getElementById('moderateCarb').textContent = moderateMacros.carbs + 'g';
+
+				const lowerMacros = calculateMacros(roundedCalories, ratios.lower);
+				document.getElementById('lowerProtein').textContent = lowerMacros.protein + 'g';
+				document.getElementById('lowerFat').textContent = lowerMacros.fats + 'g';
+				document.getElementById('lowerCarb').textContent = lowerMacros.carbs + 'g';
+
+				const higherMacros = calculateMacros(roundedCalories, ratios.higher);
+				document.getElementById('higherProtein').textContent = higherMacros.protein + 'g';
+				document.getElementById('higherFat').textContent = higherMacros.fats + 'g';
+				document.getElementById('higherCarb').textContent = higherMacros.carbs + 'g';
+			}
+
+			
+			// Macro mode toggle handlers
+			document.getElementById('maintenanceBtn').addEventListener('click', function() {
+				isMaintenance = true;
+				this.classList.add('active');
+				document.getElementById('cuttingBtn').classList.remove('active');
+				if (currentTDEE) updateMacros(currentTDEE);
+			});
+			
+			document.getElementById('cuttingBtn').addEventListener('click', function() {
+				isMaintenance = false;
+				this.classList.add('active');
+				document.getElementById('maintenanceBtn').classList.remove('active');
+				if (currentTDEE) updateMacros(currentTDEE);
+			});
 		});
-		let isMaintenance = true;
-        let currentTDEE = 0;
-        
-        const ratios = {
-            moderate: { protein: 0.30, fats: 0.35, carbs: 0.35 },
-            lower: { protein: 0.40, fats: 0.40, carbs: 0.20 },
-            higher: { protein: 0.30, fats: 0.20, carbs: 0.50 }
-        };
-        
-        function calculateMacros(calories, ratio) {
-            return {
-                protein: Math.round((calories * ratio.protein) / 4), // 4 calories per gram
-                fats: Math.round((calories * ratio.fats) / 9),      // 9 calories per gram
-                carbs: Math.round((calories * ratio.carbs) / 4)     // 4 calories per gram
-            };
-        }
-        
-        function updateMacros(tdee) {
-			const calories = isMaintenance ? tdee : tdee - 500;
-			currentTDEE = tdee;
-			
-			// **Round calories to nearest whole number**
-			const roundedCalories = Math.round(calories);
-			
-			// Update calories text
-			const caloriesText = document.getElementById('macroCalories');
-			caloriesText.textContent = `These macronutrient values reflect your ${isMaintenance ? 'maintenance' : 'cutting'} calories of ${roundedCalories} calories / day${!isMaintenance ? `, which is a 500 calorie / day deficit from your maintenance of ${Math.round(tdee)} calories / day` : ''}.`;
-
-			// Calculate and update all macro ratios
-			const moderateMacros = calculateMacros(roundedCalories, ratios.moderate);
-			document.getElementById('moderateProtein').textContent = moderateMacros.protein + 'g';
-			document.getElementById('moderateFat').textContent = moderateMacros.fats + 'g';
-			document.getElementById('moderateCarb').textContent = moderateMacros.carbs + 'g';
-
-			const lowerMacros = calculateMacros(roundedCalories, ratios.lower);
-			document.getElementById('lowerProtein').textContent = lowerMacros.protein + 'g';
-			document.getElementById('lowerFat').textContent = lowerMacros.fats + 'g';
-			document.getElementById('lowerCarb').textContent = lowerMacros.carbs + 'g';
-
-			const higherMacros = calculateMacros(roundedCalories, ratios.higher);
-			document.getElementById('higherProtein').textContent = higherMacros.protein + 'g';
-			document.getElementById('higherFat').textContent = higherMacros.fats + 'g';
-			document.getElementById('higherCarb').textContent = higherMacros.carbs + 'g';
-		}
-
-        
-        // Macro mode toggle handlers
-        document.getElementById('maintenanceBtn').addEventListener('click', function() {
-            isMaintenance = true;
-            this.classList.add('active');
-            document.getElementById('cuttingBtn').classList.remove('active');
-            if (currentTDEE) updateMacros(currentTDEE);
-        });
-        
-        document.getElementById('cuttingBtn').addEventListener('click', function() {
-            isMaintenance = false;
-            this.classList.add('active');
-            document.getElementById('maintenanceBtn').classList.remove('active');
-            if (currentTDEE) updateMacros(currentTDEE);
-        });
     </script>
 </body>
 </html>
