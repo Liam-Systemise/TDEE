@@ -428,13 +428,11 @@
 			const weightUnit = isMetric ? 'kg' : 'lbs';
 
 			// Convert weight if needed
-			const conversionFactor = isMetric ? 0.453592 : 2.20462; // Convert kg to lbs if necessary
 			const idealWeights = {
-				hamwi: (hamwi * conversionFactor).toFixed(1),
-				devine: (devine * conversionFactor).toFixed(1),
-				robinson: (robinson * conversionFactor).toFixed(1),
-				miller: (miller * conversionFactor).toFixed(1)
-			};
+				hamwi: isMetric ? (hamwi * 0.453592).toFixed(1) : hamwi.toFixed(1),
+				devine: isMetric ? (devine * 0.453592).toFixed(1) : devine.toFixed(1),
+				robinson: isMetric ? (robinson * 0.453592).toFixed(1) : robinson.toFixed(1),
+				miller: isMetric ? (miller * 0.453592).toFixed(1) : miller.toFixed(1)
 
 			// Calculate min and max weights
 			const weights = Object.values(idealWeights).map(w => parseFloat(w));
