@@ -95,38 +95,38 @@
             font-size: 1rem;
             color: #757575;
         }
-	.dropdown-options {
-	    position: absolute;
-	    top: 100%;
-	    left: 0;
-	    right: 0;
-	    border: 1px solid #ddd;
-	    border-radius: 4px;
-	    background-color: white;
-	    display: none;
-	    z-index: 1000;
-	    max-height: 250px; /* Limit height to prevent dropdowns from being too long */
-	    overflow-y: auto; /* Enable scrolling */
-	    scrollbar-width: thin; /* For Firefox */
-	    scrollbar-color: #aaa #fff; /* Custom scrollbar color */
-	}
-	
-	/* Make scrolling smooth on touch devices */
-	.dropdown-options::-webkit-scrollbar {
-	    width: 6px;
-	}
-	
-	.dropdown-options::-webkit-scrollbar-thumb {
-	    background-color: #aaa;
-	    border-radius: 4px;
-	}
-	
-	/* Improve touch scrolling for mobile users */
-	@media (max-width: 600px) {
-	    .dropdown-options {
-	        max-height: 180px; /* Reduce height slightly on small screens */
-	    }
-	}
+        .dropdown-options {
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			background-color: white;
+			display: none;
+			z-index: 1000;
+			max-height: 250px; /* Limit height to prevent dropdowns from being too long */
+			overflow-y: auto; /* Enable scrolling */
+			scrollbar-width: thin; /* For Firefox */
+			scrollbar-color: #aaa #fff; /* Custom scrollbar color */
+		}
+
+		/* Make scrolling smooth on touch devices */
+		.dropdown-options::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		.dropdown-options::-webkit-scrollbar-thumb {
+			background-color: #aaa;
+			border-radius: 4px;
+		}
+
+		/* Improve touch scrolling for mobile users */
+		@media (max-width: 600px) {
+			.dropdown-options {
+				max-height: 180px; /* Reduce height slightly on small screens */
+			}
+		}
 
         .dropdown-options div {
             padding: 0.5rem;
@@ -453,6 +453,7 @@
 				devine: isMetric ? (devine * 0.453592).toFixed(1) : devine.toFixed(1),
 				robinson: isMetric ? (robinson * 0.453592).toFixed(1) : robinson.toFixed(1),
 				miller: isMetric ? (miller * 0.453592).toFixed(1) : miller.toFixed(1)
+			};
 
 			// Calculate min and max weights
 			const weights = Object.values(idealWeights).map(w => parseFloat(w));
