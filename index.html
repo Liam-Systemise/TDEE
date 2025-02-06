@@ -481,65 +481,12 @@
 				const resultDiv = document.getElementById('result');
 				resultDiv.style.display = 'block';
 				resultDiv.innerHTML = `
-					<div class="results-section">
-						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Daily Energy Requirements</h2>
-						<p>Basal Metabolic Rate: ${Math.round(bmr)} calories/day</p>
-						<p style="margin-top: 10px; font-size: 0.9em;">TDEE estimate for your activity level:</p>
-						<div style="margin-left: 15px;">
-							<p ${activity === 1.2 ? 'style="font-weight: bold;"' : ''}>Low Exercise (Mostly Seated): ${Math.round(bmr * 1.2)} calories/day</p>
-							<p ${activity === 1.375 ? 'style="font-weight: bold;"' : ''}>Light Exercise (1-2 days/week): ${Math.round(bmr * 1.375)} calories/day</p>
-							<p ${activity === 1.55 ? 'style="font-weight: bold;"' : ''}>Medium Exercise (3-5 days/week): ${Math.round(bmr * 1.55)} calories/day</p>
-							<p ${activity === 1.725 ? 'style="font-weight: bold;"' : ''}>High Exercise (6-7 days/week): ${Math.round(bmr * 1.725)} calories/day</p>
-							<p ${activity === 1.9 ? 'style="font-weight: bold;"' : ''}>Heavy Exercise (2x daily): ${Math.round(bmr * 1.9)} calories/day</p>
-						</div>
-					</div>
-
-					<div class="results-section" style="margin-top: 20px;">
-						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Ideal Weight (${minWeight} - ${maxWeight} ${weightUnit})</h2>
-						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-							<div>
-								<p>G.J. Hamwi (1964): ${idealWeights.hamwi} ${weightUnit}</p>
-								<p>B.J. Devine (1974): ${idealWeights.devine} ${weightUnit}</p>
-							</div>
-							<div>
-								<p>J.D. Robinson (1983): ${idealWeights.robinson} ${weightUnit}</p>
-								<p>D.R. Miller (1983): ${idealWeights.miller} ${weightUnit}</p>
-							</div>
-						</div>
-					</div>
-
-					<div class="results-section" style="margin-top: 20px;">
-						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">BMI Score: ${bmi} (${bmiCategory})</h2>
-						<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-							<tr style="background-color: #e5e7eb;">
-								<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Classification</th>
-								<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">BMI Range</th>
-							</tr>
-							<tr style="background-color: ${bmi < 18.5 ? '#f3f4f6' : ''}">
-								<td style="padding: 8px; border: 1px solid #ddd;">Underweight</td>
-								<td style="padding: 8px; border: 1px solid #ddd;">&lt; 18.5</td>
-							</tr>
-							<tr style="background-color: ${bmi >= 18.5 && bmi < 25 ? '#f3f4f6' : ''}">
-								<td style="padding: 8px; border: 1px solid #ddd;">Normal Weight</td>
-								<td style="padding: 8px; border: 1px solid #ddd;">18.5 - 24.9</td>
-							</tr>
-							<tr style="background-color: ${bmi >= 25 && bmi < 30 ? '#f3f4f6' : ''}">
-								<td style="padding: 8px; border: 1px solid #ddd;">Overweight</td>
-								<td style="padding: 8px; border: 1px solid #ddd;">25.0 - 29.9</td>
-							</tr>
-							<tr style="background-color: ${bmi >= 30 ? '#f3f4f6' : ''}">
-								<td style="padding: 8px; border: 1px solid #ddd;">Obese</td>
-								<td style="padding: 8px; border: 1px solid #ddd;">&ge; 30.0</td>
-							</tr>
-						</table>
-					</div>
-
 					<div class="macro-section">
 						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Macronutrients</h2>
 						
 						<div class="macro-toggle">
-							<button type="button" id="maintenanceBtn" class="active">Maintenance</button>
-							<button type="button" id="cuttingBtn">Cutting</button>
+							<button type="button" id="maintenanceBtn" class="active">Maintenance Calories</button>
+							<button type="button" id="cuttingBtn">Deficit (Cutting) Calories</button>
 						</div>
 						
 						<p id="macroCalories"></p>
@@ -600,6 +547,59 @@
 							</div>
 						</div>
 						<p class="macro-guide">There are 4 calories per gram of both protein and carbohydrates, and 9 calories per gram of fats.</p>
+					</div>
+				
+					<div class="results-section">
+						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Daily Energy Requirements</h2>
+						<p>Basal Metabolic Rate: ${Math.round(bmr)} calories/day</p>
+						<p style="margin-top: 10px; font-size: 0.9em;">TDEE estimate for your activity level:</p>
+						<div style="margin-left: 15px;">
+							<p ${activity === 1.2 ? 'style="font-weight: bold;"' : ''}>Low Exercise (Mostly Seated): ${Math.round(bmr * 1.2)} calories/day</p>
+							<p ${activity === 1.375 ? 'style="font-weight: bold;"' : ''}>Light Exercise (1-2 days/week): ${Math.round(bmr * 1.375)} calories/day</p>
+							<p ${activity === 1.55 ? 'style="font-weight: bold;"' : ''}>Medium Exercise (3-5 days/week): ${Math.round(bmr * 1.55)} calories/day</p>
+							<p ${activity === 1.725 ? 'style="font-weight: bold;"' : ''}>High Exercise (6-7 days/week): ${Math.round(bmr * 1.725)} calories/day</p>
+							<p ${activity === 1.9 ? 'style="font-weight: bold;"' : ''}>Heavy Exercise (2x daily): ${Math.round(bmr * 1.9)} calories/day</p>
+						</div>
+					</div>
+
+					<div class="results-section" style="margin-top: 20px;">
+						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">Ideal Weight (${minWeight} - ${maxWeight} ${weightUnit})</h2>
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+							<div>
+								<p>G.J. Hamwi (1964): ${idealWeights.hamwi} ${weightUnit}</p>
+								<p>B.J. Devine (1974): ${idealWeights.devine} ${weightUnit}</p>
+							</div>
+							<div>
+								<p>J.D. Robinson (1983): ${idealWeights.robinson} ${weightUnit}</p>
+								<p>D.R. Miller (1983): ${idealWeights.miller} ${weightUnit}</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="results-section" style="margin-top: 20px;">
+						<h2 style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">BMI Score: ${bmi} (${bmiCategory})</h2>
+						<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+							<tr style="background-color: #e5e7eb;">
+								<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Classification</th>
+								<th style="text-align: left; padding: 8px; border: 1px solid #ddd;">BMI Range</th>
+							</tr>
+							<tr style="background-color: ${bmi < 18.5 ? '#f3f4f6' : ''}">
+								<td style="padding: 8px; border: 1px solid #ddd;">Underweight</td>
+								<td style="padding: 8px; border: 1px solid #ddd;">&lt; 18.5</td>
+							</tr>
+							<tr style="background-color: ${bmi >= 18.5 && bmi < 25 ? '#f3f4f6' : ''}">
+								<td style="padding: 8px; border: 1px solid #ddd;">Normal Weight</td>
+								<td style="padding: 8px; border: 1px solid #ddd;">18.5 - 24.9</td>
+							</tr>
+							<tr style="background-color: ${bmi >= 25 && bmi < 30 ? '#f3f4f6' : ''}">
+								<td style="padding: 8px; border: 1px solid #ddd;">Overweight</td>
+								<td style="padding: 8px; border: 1px solid #ddd;">25.0 - 29.9</td>
+							</tr>
+							<tr style="background-color: ${bmi >= 30 ? '#f3f4f6' : ''}">
+								<td style="padding: 8px; border: 1px solid #ddd;">Obese</td>
+								<td style="padding: 8px; border: 1px solid #ddd;">&ge; 30.0</td>
+							</tr>
+						</table>
 						<p style="font-size: 1em; margin-top: 5px;">
 							Want more support, motivation & tips? Join our helpful free community on 
 							<a href="https://www.skool.com/calorie-deficit-with-sammi/about" target="_blank" rel="noopener noreferrer" style="color: black; text-decoration: none;">
@@ -607,6 +607,8 @@
 							</a>
 						</p>
 					</div>
+
+					
 				`;
 				
 				 setTimeout(() => {
@@ -668,7 +670,7 @@
 				
 				// Update calories text
 				const caloriesText = document.getElementById('macroCalories');
-				caloriesText.textContent = `These macronutrient values reflect your ${isMaintenance ? 'maintenance' : 'cutting'} calories of ${roundedCalories} calories / day${!isMaintenance ? `. This is what you need to eat to lose weight` : '. This is what you need to eat to maintain your current weight'}.`;
+				caloriesText.innerHTML = `<span style="font-weight: bold; font-size: 18px;">These macronutrient values reflect your ${isMaintenance ? 'maintenance' : 'deficit (cutting)'} calories of ${roundedCalories} calories / day${!isMaintenance ? '. This is what you need to eat to lose weight' : '. This is what you need to eat to maintain your current weight'}.</span>`;
 
 				// Calculate and update all macro ratios
 				const moderateMacros = calculateMacros(roundedCalories, ratios.moderate);
